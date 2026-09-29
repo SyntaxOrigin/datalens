@@ -1,0 +1,6 @@
+{"kimlik": 1, "gecme_ms": 120.5, "basarili": true, "servis": "kapi", "zaman": "2024-01-15T09:12:00"}
+{"kimlik": 2, "gecme_ms": 840.25, "basarili": true, "servis": "sorgu", "zaman": "2024-01-15T09:12:01"}
+{"kimlik": 3, "gecme_ms": 35, "basarili": false, "servis": "kapi", "zaman": "2024-01-15T09:12:02"}
+{"kimlik": 4, "gecme_ms": 1250.75, "basarili": true, "servis": "rapor", "zaman": "2024-01-15T09:12:03"}
+bu bir bozuk satir
+{"kimlik": 5, "gecme_ms": 210.0, "basarili": true, "servis": "kapi", "zaman": "2024-01-15T09:12:04"}

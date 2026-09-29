@@ -1,0 +1,11 @@
+siparis_no,urun,adet,fiyat,tarih,sehir,not
+1001,"Kalem, kırmızı",12,45.50,2024-01-15,Ankara,
+1002,Defter,3,120.00,2024-01-16,İstanbul,acele
+1003,"Çanta, büyük",1,899.90,15.02.2024,İzmir,
+1004,Kalem,25,45.50,2024-02-20,Ankara,ikinci sipariş
+1005,Defter,8,120.00,2024-02-28,Bursa,
+1006,"Kalem, mavi",40,42.00,05.03.2024,Ankara,
+1007,Çanta,2,899.90,2024-03-11,İstanbul,"müşteri değişti, telefon 0555 000 00 00"
+1008,Defter,1,120.00,2024-03-15,İzmir,
+1009,Kalem,7,45.50,2024-04-02,Bursa,
+1010,"Kitap, novel",4,199.00,2024-04-11,Ankara,satış

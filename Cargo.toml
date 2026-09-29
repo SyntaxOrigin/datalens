@@ -1,0 +1,29 @@
+[package]
+name = "datalens"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+license = "MIT"
+description = "CSV, TSV ve JSONL dosyalarini sabit bellekle acan, profilleyen ve disa aktaran terminal goruntuleyicisi."
+repository = "https://github.com/SyntaxOrigin/datalens"
+readme = "README.md"
+keywords = ["csv", "tsv", "jsonl", "cli", "dataview"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+# serde: src/profil.rs ve src/tip.rs icindeki cikti yapi tureticileri, schema ve pencere
+# JSON ciktisinin uretilmesi icin gerekli.
+serde = { version = "1", features = ["derive"] }
+# serde_json: JSONL kayitlarinin dogrulanmasi (src/ayristirici.rs) ve JSON ciktisinin
+# yazilmasi (src/disa.rs, src/main.rs) icin ayristirici/serilestirici gerekli.
+serde_json = "1"
+# clap: src/main.rs icindeki alt komut ve secenek cozumlemesi icin arguman ayristirici
+# gerekli (bkz. WORKER_CONTRACT.md 3.2-B).
+clap = { version = "4", features = ["derive"] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = "debuginfo"
