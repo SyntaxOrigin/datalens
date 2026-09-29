@@ -1,0 +1,90 @@
+# Kalite kapısının CI karşılığı.
+#
+# WORKER_CONTRACT.md § 11'deki dört kontrolün aynısı: derleme, test, clippy, fmt.
+# Ek olarak bagimlilik politikasinin ([dependencies] bloklarinin izinli listede
+# olmasi) ve `forbid(unsafe_code)` ilkesinin korunmasi denetlenir.
+
+name: kalite-kapisi
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  kalite:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust kurulumu (MSRV karşılığı)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Önbellek
+        uses: Swatinem/rust-cache@v2
+
+      - name: Bağımlılık politikası denetimi
+        shell: bash
+        run: |
+          set -euo pipefail
+          izinli="serde serde_json clap"
+          basarisiz=0
+          for blok in dependencies dev-dependencies build-dependencies; do
+            adlar=$(awk -v b="[$blok]" '
+              $0 ~ /^\[/ { aktif = ($0 ~ "^\\[" b "\\]") ; next }
+              aktif && /^[[:space:]]*[A-Za-z0-9_-]+[[:space:]]*=/ {
+                satir=$0; gsub(/^[[:space:]]+/, "", satir); gsub(/[[:space:]]*=.*$/, "", satir);
+                gsub(/\..*$/, "", satir); print satir
+              }' Cargo.toml)
+            [ -z "$adlar" ] && continue
+            for ad in $adlar; do
+              case " $izinli " in
+                *" $ad "*) echo "OK   [$blok] $ad" ;;
+                *) echo "FAIL [$blok] $ad"; basarisiz=1 ;;
+              esac
+            done
+          done
+          [ "$basarisiz" -eq 0 ] || { echo "izinli olmayan bagimlilik var"; exit 1; }
+
+      - name: unsafe kullanımı yok
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -rn --include=*.rs -E '(^|[^A-Za-z_])unsafe[[:space:]]*(\{|\()' src tests; then
+            echo "kendi kodumuzda unsafe bulundu"; exit 1
+          fi
+          grep -q '#!\[forbid(unsafe_code)\]' src/lib.rs
+          grep -q '#!\[forbid(unsafe_code)\]' src/main.rs
+
+      - name: Derleme
+        run: cargo build --release
+
+      - name: Test
+        run: cargo test
+
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Biçim
+        run: cargo fmt --all --check
+
+      - name: Üretim kodunda unwrap/expect/panic yok
+        shell: bash
+        run: |
+          set -euo pipefail
+          basarisiz=0
+          for dosya in src/*.rs; do
+            sed '/#\[cfg(test)\]/,$d' "$dosya" | grep -nE '\.unwrap\(\)|\.expect\(|panic!\(' && basarisiz=1 || true
+          done
+          [ "$basarisiz" -eq 0 ] || { echo "uretim kodunda unwrap/expect/panic var"; exit 1; }
